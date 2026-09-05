@@ -29,13 +29,13 @@
 
 
 #define BUILTIN_LED_GPIO        GPIO_NUM_48
-#define BOOT_BUTTON_GPIO        GPIO_NUM_nc
+#define BOOT_BUTTON_GPIO        GPIO_NUM_NC
 #define TOUCH_BUTTON_GPIO       GPIO_NUM_NC
 #define VOLUME_UP_BUTTON_GPIO   GPIO_NUM_NC
 #define VOLUME_DOWN_BUTTON_GPIO GPIO_NUM_NC
 
 
-#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_4298
+#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_42
 #define DISPLAY_MOSI_PIN      GPIO_NUM_47
 #define DISPLAY_CLK_PIN       GPIO_NUM_21
 #define DISPLAY_DC_PIN        GPIO_NUM_40
@@ -282,8 +282,11 @@
 #define DISPLAY_SPI_MODE 0
 #endif
 
-
-// A MCP Test: Control a lamp
-#define LAMP_GPIO GPIO_NUM_18
+// Home Automation Devices
+#define TV_GPIO            GPIO_NUM_18
+#define AC_GPIO            GPIO_NUM_1
+#define FAN_GPIO           GPIO_NUM_2
+#define LIGHT_GPIO         GPIO_NUM_3
+#define DESKTOP_LIGHT_GPIO GPIO_NUM_8
 
 #endif // _BOARD_CONFIG_H_
