@@ -495,12 +495,13 @@ void LcdDisplay::SetupUI() {
     lv_obj_align(emoji_image_, LV_ALIGN_TOP_MID, 0,
                  text_font->line_height + lvgl_theme->spacing(8));
 
-    // Display AI logo while booting
+    // Display custom boot screen
     emoji_label_ = lv_label_create(screen);
     lv_obj_center(emoji_label_);
-    lv_obj_set_style_text_font(emoji_label_, large_icon_font, 0);
+    lv_obj_set_style_text_font(emoji_label_, text_font, 0);
     lv_obj_set_style_text_color(emoji_label_, lvgl_theme->text_color(), 0);
-    lv_label_set_text(emoji_label_, MATERIAL_SYMBOLS_ROBOT_2);
+    lv_obj_set_style_text_align(emoji_label_, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_text(emoji_label_, "EMO is booting...\nDheeraj & Bro's Edition");
 }
 #if CONFIG_IDF_TARGET_ESP32P4
 #define MAX_MESSAGES 40
@@ -566,6 +567,9 @@ void LcdDisplay::SetChatMessage(const char* role, const char* content) {
             }
         }
     } else {
+      if (emoji_image_ != nullptr) {
+            lv_obj_add_flag(emoji_image_, LV_OBJ_FLAG_HIDDEN);
+        }
         // Hide the centered AI logo
         lv_obj_add_flag(emoji_label_, LV_OBJ_FLAG_HIDDEN);
     }
