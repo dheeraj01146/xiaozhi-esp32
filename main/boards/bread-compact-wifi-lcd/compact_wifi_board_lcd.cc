@@ -133,11 +133,56 @@ private:
         });
     }
 
-    // 物联网初始化，添加对 AI 可见设备
-    void InitializeTools() {
-        static LampController lamp(LAMP_GPIO);
-    }
+    // Initialize IoT tools visible to AI
+void InitializeTools() {
+    // 4-Relays Output GPIO Setup (GPIO 10, 11, 12, 13)
+    gpio_config_t relay_cfg = {
+        .pin_bit_mask = (1ULL << LIGHT_GPIO) | (1ULL << SECOND_LIGHT_GPIO) | 
+                        (1ULL << FAN_GPIO) | (1ULL << TV_GPIO),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&relay_cfg);
 
+    // Turn off all relays by default at boot
+    gpio_set_level(LIGHT_GPIO, 0);
+    gpio_set_level(SECOND_LIGHT_GPIO, 0);
+    gpio_set_level(FAN_GPIO, 0);
+    gpio_set_level(TV_GPIO, 0);
+
+    // AI MCP Voice Command Tool
+    auto& mcp = McpServer::GetInstance();
+    mcp.AddTool(
+        "self.device.control",
+        "Control home appliances: light, second_light, fan, tv. state is true for ON, false for OFF",
+        PropertyList({
+            Property("device", kPropertyTypeString, "light, second_light, fan, tv"),
+            Property("state", kPropertyTypeBoolean)
+        }),
+        [](const PropertyList& properties) -> ReturnValue {
+            std::string device = properties["device"].value<std::string>();
+            bool state = properties["state"].value<bool>();
+            
+            gpio_num_t target_pin;
+            if (device == "light") {
+                target_pin = LIGHT_GPIO;
+            } else if (device == "second_light") {
+                target_pin = SECOND_LIGHT_GPIO;
+            } else if (device == "fan") {
+                target_pin = FAN_GPIO;
+            } else if (device == "tv") {
+                target_pin = TV_GPIO;
+            } else {
+                return false;
+            }
+
+            gpio_set_level(target_pin, state ? 1 : 0);
+            return true;
+        }
+    );
+}
 public:
     CompactWifiBoardLCD() :
         boot_button_(BOOT_BUTTON_GPIO) {
