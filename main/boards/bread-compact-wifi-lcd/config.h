@@ -45,11 +45,11 @@
 
 #ifdef CONFIG_LCD_ST7789_240X320
 #define LCD_TYPE_ST7789_SERIAL
-#define DISPLAY_WIDTH   240
-#define DISPLAY_HEIGHT  320
-#define DISPLAY_MIRROR_X false
+#define DISPLAY_WIDTH   320
+#define DISPLAY_HEIGHT  240
+#define DISPLAY_MIRROR_X true
 #define DISPLAY_MIRROR_Y false
-#define DISPLAY_SWAP_XY false
+#define DISPLAY_SWAP_XY true
 #define DISPLAY_INVERT_COLOR    true
 #define DISPLAY_RGB_ORDER  LCD_RGB_ELEMENT_ORDER_RGB
 #define DISPLAY_OFFSET_X  0
@@ -283,7 +283,10 @@
 #endif
 
 
-// A MCP Test: Control a lamp
-#define LAMP_GPIO GPIO_NUM_18
+// 4-Channel Home Automation Relays for EMO
+#define LIGHT_GPIO         GPIO_NUM_10
+#define SECOND_LIGHT_GPIO  GPIO_NUM_11
+#define FAN_GPIO           GPIO_NUM_12
+#define TV_GPIO            GPIO_NUM_13
 
 #endif // _BOARD_CONFIG_H_
