@@ -2,7 +2,6 @@
 #include <esp_log.h>
 #include <cstring>
 
-#include "esp_mn_models.h"
 #define RATE_CVT_CFG(_src_rate, _dest_rate, _channel)                                        \
     (esp_ae_rate_cvt_cfg_t) {                                                                \
         .src_rate = (uint32_t)(_src_rate), .dest_rate = (uint32_t)(_dest_rate),              \
@@ -662,9 +661,7 @@ std::unique_ptr<AudioStreamPacket> AudioService::PopWakeWordPacket() {
 void AudioService::EnableWakeWordDetection(bool enable) {
     ESP_LOGD(TAG, "%s wake word detection", enable ? "Enabling" : "Disabling");
    if (enable) {
-        esp_mn_commands_add(1, "hey neharika");
-        esp_mn_commands_update();
-    }
+      
         if (!InitializeAudioEngine()) {
             xEventGroupClearBits(event_group_, AS_EVENT_WAKE_WORD_RUNNING);
             return;
