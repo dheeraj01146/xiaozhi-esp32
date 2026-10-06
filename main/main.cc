@@ -13,8 +13,8 @@
 
 extern "C" void app_main(void)
 {
-    setenv("TZ", "IST-5:30", 1);
-    tzset();
+    setenv("TZ", "UTC0", 1);
+tzset();
     // Initialize NVS flash for WiFi configuration
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
