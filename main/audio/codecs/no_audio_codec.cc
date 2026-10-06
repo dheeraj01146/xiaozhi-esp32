@@ -206,8 +206,8 @@ NoAudioCodecSimplex::NoAudioCodecSimplex(int input_sample_rate, int output_sampl
     chan_cfg.id = XIAOZHI_I2S_PORT(1);
     ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, nullptr, &rx_handle_));
     std_cfg.clk_cfg.sample_rate_hz = (uint32_t)input_sample_rate_;
-    std_cfg.slot_cfg.slot_mode = I2S_SLOT_MODE_STEREO;
-    std_cfg.slot_cfg.slot_mask = I2S_STD_SLOT_BOTH;
+    std_cfg.slot_cfg.slot_mode = I2S_SLOT_MODE_MONO;
+    std_cfg.slot_cfg.slot_mask = I2S_STD_SLOT_LEFT;
     std_cfg.gpio_cfg.bclk = mic_sck;
     std_cfg.gpio_cfg.ws = mic_ws;
     std_cfg.gpio_cfg.dout = I2S_GPIO_UNUSED;
@@ -243,19 +243,15 @@ int NoAudioCodec::Read(int16_t* dest, int samples) {
     size_t bytes_read;
     constexpr uint32_t kReadTimeoutMs = 200;
 
-    // दोनों माइक (Stereo) के लिए डबल बफ़र
-    std::vector<int32_t> bit32_buffer(samples * 2);
-    if (i2s_channel_read(rx_handle_, bit32_buffer.data(), samples * 2 * sizeof(int32_t), &bytes_read, kReadTimeoutMs) != ESP_OK) {
+    std::vector<int32_t> bit32_buffer(samples);
+    if (i2s_channel_read(rx_handle_, bit32_buffer.data(), samples * sizeof(int32_t), &bytes_read, kReadTimeoutMs) != ESP_OK) {
         return 0;
     }
 
-    int read_samples = bytes_read / (sizeof(int32_t) * 2);
+    int read_samples = bytes_read / sizeof(int32_t);
     for (int i = 0; i < read_samples; i++) {
-        int32_t left = bit32_buffer[i * 2] >> 12;
-        int32_t right = bit32_buffer[i * 2 + 1] >> 12;
-        // दोनों माइक की आवाज़ को मिक्स करके बैलेंस्ड सिग्नल बनाएँ
-        int32_t value = (left + right) / 2;
-        dest[i] = (value > INT16_MAX) ? INT16_MAX : (value < -INT16_MAX) ? -INT16_MAX : (int16_t)value;
+        int32_t val = bit32_buffer[i] >> 12;
+        dest[i] = (val > INT16_MAX) ? INT16_MAX : (val < -INT16_MAX) ? -INT16_MAX : (int16_t)val;
     }
     return read_samples;
 }
