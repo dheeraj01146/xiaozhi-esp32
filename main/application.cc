@@ -633,7 +633,7 @@ void Application::InitializeProtocol() {
                         if (listening_mode_ == kListeningModeManualStop) {
                             SetDeviceState(kDeviceStateIdle);
                         } else {
-                            SetDeviceState(kDeviceStateIdle);
+                            SetDeviceState(kDeviceStateListening);
                         }
                     }
                 });
