@@ -633,7 +633,7 @@ void Application::InitializeProtocol() {
                         if (listening_mode_ == kListeningModeManualStop) {
                             SetDeviceState(kDeviceStateIdle);
                         } else {
-                            SetDeviceState(kDeviceStateListening);
+                            SetDeviceState(kDeviceStateIdle);
                         }
                     }
                 });
@@ -901,6 +901,9 @@ void Application::HandleWakeWordDetectedEvent() {
     }
 
     auto state = GetDeviceState();
+   if (state == kDeviceStateSpeaking) {
+    return;
+} 
     auto wake_word = audio_service_.GetLastWakeWord();
     ESP_LOGI(TAG, "Wake word detected: %s (state: %d)", wake_word.c_str(), (int)state);
 
