@@ -288,13 +288,11 @@
 // 4-Channel Remote Relay MAC
 #define REMOTE_RELAY_MAC {0x68, 0x09, 0x47, 0x86, 0x26, 0xA0}
 
-// Dummy GPIOs to satisfy board references
-#define FIRST_LIGHT_GPIO GPIO_NUM_10
-#define SECOND_LIGHT_GPIO GPIO_NUM_10
-#define FAN_GPIO GPIO_NUM_10
-#define TV_GPIO GPIO_NUM_10
+// 4-Channel Home Automation Relays for EMO (Dummy pins for board file)
+#define LIGHT_GPIO GPIO_NUM_10
+#define SECOND_LIGHT_GPIO GPIO_NUM_11
+#define FAN_GPIO GPIO_NUM_12
+#define TV_GPIO GPIO_NUM_13
 
 #endif // _BOARD_CONFIG_H_
-
-
 
