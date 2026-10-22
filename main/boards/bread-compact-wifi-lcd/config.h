@@ -289,10 +289,10 @@
 #define REMOTE_RELAY_MAC {0x68, 0x09, 0x47, 0x86, 0x26, 0xA0}
 
 // Dummy GPIOs to satisfy board references
-#define FIRST_LIGHT_GPIO GPIO_NUM_NC
-#define SECOND_LIGHT_GPIO GPIO_NUM_NC
-#define FAN_GPIO GPIO_NUM_NC
-#define TV_GPIO GPIO_NUM_NC
+#define FIRST_LIGHT_GPIO GPIO_NUM_10
+#define SECOND_LIGHT_GPIO GPIO_NUM_10
+#define FAN_GPIO GPIO_NUM_10
+#define TV_GPIO GPIO_NUM_10
 
 #endif // _BOARD_CONFIG_H_
 
