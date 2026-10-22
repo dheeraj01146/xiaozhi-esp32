@@ -282,11 +282,9 @@
 #define DISPLAY_SPI_MODE 0
 #endif
 
+// SG90 Servo Head Pin
+#define SERVO_HEAD_GPIO GPIO_NUM_18
 
-// 4-Channel Home Automation Relays for EMO
-#define LIGHT_GPIO         GPIO_NUM_10
-#define SECOND_LIGHT_GPIO  GPIO_NUM_11
-#define FAN_GPIO           GPIO_NUM_12
-#define TV_GPIO            GPIO_NUM_13
-
+// 4-Channel Remote Relay MAC
+#define REMOTE_RELAY_MAC {0x68, 0x09, 0x47, 0x86, 0x26, 0xA0}
 #endif // _BOARD_CONFIG_H_
