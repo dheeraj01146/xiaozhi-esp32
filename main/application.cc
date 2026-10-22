@@ -1462,6 +1462,13 @@ void Application::ResetProtocol() {
         if (protocol_ && protocol_->IsAudioChannelOpened()) {
             protocol_->CloseAudioChannel();
         }
+
+
+
+
+
+
+        
         // Reset protocol
         protocol_.reset();
     });
