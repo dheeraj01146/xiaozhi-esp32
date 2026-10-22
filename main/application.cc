@@ -19,11 +19,64 @@
 #include <cstring>
 #include <limits>
 
+#include <esp_now.h>
+#include <esp_wifi.h>
+#include "driver/ledc.h"
+#include <cctype>
+
+static uint8_t relay_mac_addr[6] = {0x68, 0x09, 0x47, 0x86, 0x26, 0xA0};
+
+static void init_espnow_sender() {
+    esp_now_init();
+    esp_now_peer_info_t peer = {};
+    memcpy(peer.peer_addr, relay_mac_addr, 6);
+    peer.channel = 0;
+    peer.encrypt = false;
+    esp_now_add_peer(&peer);
+}
+
+static void init_servo_head() {
+    ledc_timer_config_t t_cfg = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_13_BIT,
+        .timer_num = LEDC_TIMER_0,
+        .freq_hz = 50,
+        .clk_cfg = LEDC_AUTO_CLK
+    };
+    ledc_timer_config(&t_cfg);
+
+    ledc_channel_config_t ch_cfg = {
+        .gpio_num = GPIO_NUM_18,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .intr_type = LEDC_INTR_DISABLE,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 0,
+        .hpoint = 0
+    };
+    ledc_channel_config(&ch_cfg);
+}
+
+static void move_servo(int angle) {
+    if (angle < 0) angle = 0;
+    if (angle > 180) angle = 180;
+    uint32_t duty = (uint32_t)(205 + ((float)angle / 180.0) * (1024 - 205));
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+}
+
+static void trigger_relay(const char* cmd) {
+    esp_now_send(relay_mac_addr, (const uint8_t*)cmd, strlen(cmd));
+}
 #define TAG "Application"
 
 Application::Application() : notify_player_(audio_service_) {
     event_group_ = xEventGroupCreate();
 
+    init_espnow_sender();
+    init_servo_head();
+    move_servo(90);
+    
 #if CONFIG_USE_DEVICE_AEC && CONFIG_USE_SERVER_AEC
 #error "CONFIG_USE_DEVICE_AEC and CONFIG_USE_SERVER_AEC cannot be enabled at the same time"
 #elif CONFIG_USE_DEVICE_AEC
@@ -667,6 +720,43 @@ void Application::InitializeProtocol() {
                     display->AddTextGlyphs(glyphs, bpp);
                     display->SetChatMessage("user", message.c_str());
                 });
+                std::string vcmd = text->valuestring;
+    for (auto &c : vcmd) c = tolower(c);
+
+    if (vcmd.find("first light on") != std::string::npos || vcmd.find("frist light on") != std::string::npos) {
+        trigger_relay("first light on");
+        move_servo(60);
+    }
+    else if (vcmd.find("first light off") != std::string::npos || vcmd.find("frist light off") != std::string::npos) {
+        trigger_relay("first light off");
+        move_servo(90);
+    }
+    else if (vcmd.find("second light on") != std::string::npos) {
+        trigger_relay("second light on");
+        move_servo(120);
+    }
+    else if (vcmd.find("second light off") != std::string::npos) {
+        trigger_relay("second light off");
+        move_servo(90);
+    }
+    else if (vcmd.find("fan on") != std::string::npos) {
+        trigger_relay("fan on");
+    }
+    else if (vcmd.find("fan off") != std::string::npos) {
+        trigger_relay("fan off");
+    }
+    else if (vcmd.find("tv on") != std::string::npos) {
+        trigger_relay("tv on");
+    }
+    else if (vcmd.find("tv off") != std::string::npos) {
+        trigger_relay("tv off");
+    }
+    else if (vcmd.find("all on") != std::string::npos) {
+        trigger_relay("all on");
+    }
+    else if (vcmd.find("all off") != std::string::npos) {
+        trigger_relay("all off");
+    }
             }
         } else if (strcmp(type->valuestring, "llm") == 0) {
             auto emotion = cJSON_GetObjectItem(root, "emotion");
