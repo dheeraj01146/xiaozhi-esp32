@@ -238,14 +238,40 @@ public:
 
 DECLARE_BOARD(CompactWifiBoardLCD);
 
-#include <ESP32Servo.h>
+#include "driver/ledc.h"
 
-Servo headServo;
+void initServo() {
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_16_BIT,
+        .timer_num = LEDC_TIMER_0,
+        .freq_hz = 50,
+        .clk_cfg = LEDC_AUTO_CLK
+    };
+    ledc_timer_config(&ledc_timer);
+
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num = 18,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .intr_type = LEDC_INTR_DISABLE,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 0,
+        .hpoint = 0
+    };
+    ledc_channel_config(&ledc_channel);
+}
+
+void writeServoAngle(int angle) {
+    int duty = 3277 + (angle * (6554 - 3277) / 180);
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+}
 
 void robotBehaviorTask(void *pvParameters) {
     int currentAngle = 90;
-    headServo.attach(18);
-    headServo.write(currentAngle);
+    initServo();
+    writeServoAngle(currentAngle);
     
     int32_t buffer[512];
     size_t bytesRead;
@@ -267,11 +293,11 @@ void robotBehaviorTask(void *pvParameters) {
                 } else {
                     currentAngle = 135;
                 }
-                headServo.write(currentAngle);
+                writeServoAngle(currentAngle);
                 vTaskDelay(pdMS_TO_TICKS(400));
             } else {
                 int randomIdle = random(75, 105);
-                headServo.write(randomIdle);
+                writeServoAngle(randomIdle);
             }
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
