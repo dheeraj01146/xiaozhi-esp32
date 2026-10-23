@@ -140,7 +140,7 @@ public:
         InitializeSpi();
         InitializeLcdDisplay();
         InitializeButtons();
-        InitializeTools();
+       // InitializeTools();
         if (DISPLAY_BACKLIGHT_PIN != GPIO_NUM_NC) {
             GetBacklight()->RestoreBrightness();
         }
