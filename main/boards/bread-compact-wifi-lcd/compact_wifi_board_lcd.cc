@@ -14,6 +14,8 @@
 #include <esp_lcd_panel_vendor.h>
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
+#include <ESP32Servo.h>
+Servo headServo;
 #include <driver/spi_common.h>
 
 #if defined(LCD_TYPE_ILI9341_SERIAL)
@@ -190,6 +192,15 @@ public:
         InitializeLcdDisplay();
         InitializeButtons();
         InitializeTools();
+       xTaskCreatePinnedToCore(
+            robotBehaviorTask,
+            "RobotBehavior",
+            4096,
+            NULL,
+            1,
+            NULL,
+            1
+        );
         if (DISPLAY_BACKLIGHT_PIN != GPIO_NUM_NC) {
             GetBacklight()->RestoreBrightness();
         }
@@ -226,3 +237,43 @@ public:
 };
 
 DECLARE_BOARD(CompactWifiBoardLCD);
+
+#include <ESP32Servo.h>
+
+Servo headServo;
+
+void robotBehaviorTask(void *pvParameters) {
+    int currentAngle = 90;
+    headServo.attach(18);
+    headServo.write(currentAngle);
+    
+    int32_t buffer[512];
+    size_t bytesRead;
+
+    while (1) {
+        if (i2s_read(I2S_NUM_0, &buffer, sizeof(buffer), &bytesRead, pdMS_TO_TICKS(50)) == ESP_OK) {
+            long leftSum = 0;
+            long rightSum = 0;
+            int samples = bytesRead / sizeof(int32_t);
+            
+            for (int i = 0; i < samples; i += 2) {
+                leftSum += abs(buffer[i]);
+                rightSum += abs(buffer[i + 1]);
+            }
+
+            if (abs(leftSum - rightSum) > 500000) {
+                if (leftSum > rightSum) {
+                    currentAngle = 45;
+                } else {
+                    currentAngle = 135;
+                }
+                headServo.write(currentAngle);
+                vTaskDelay(pdMS_TO_TICKS(400));
+            } else {
+                int randomIdle = random(75, 105);
+                headServo.write(randomIdle);
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
