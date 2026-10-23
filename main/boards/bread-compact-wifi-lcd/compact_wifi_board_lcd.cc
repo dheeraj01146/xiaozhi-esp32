@@ -295,7 +295,7 @@ void robotBehaviorTask(void *pvParameters) {
                 writeServoAngle(currentAngle);
                 vTaskDelay(pdMS_TO_TICKS(400));
             } else {
-                int randomIdle = random(75, 105);
+             int randomIdle = esp_random() % 31 + 75;  // 75 se 105 ke beech ka random angle
                 writeServoAngle(randomIdle);
             }
         }
