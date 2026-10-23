@@ -14,8 +14,7 @@
 #include <esp_lcd_panel_vendor.h>
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
-#include <ESP32Servo.h>
-Servo headServo;
+#include "driver/ledc.h"
 #include <driver/spi_common.h>
 
 #if defined(LCD_TYPE_ILI9341_SERIAL)
