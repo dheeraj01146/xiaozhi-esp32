@@ -15,6 +15,7 @@
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
 #include "driver/ledc.h"
+#include "driver/i2s.h"
 #include <driver/spi_common.h>
 
 #if defined(LCD_TYPE_ILI9341_SERIAL)
