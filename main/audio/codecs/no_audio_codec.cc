@@ -249,11 +249,14 @@ int NoAudioCodec::Read(int16_t* dest, int samples) {
     }
 
     int read_samples = bytes_read / sizeof(int32_t);
-    for (int i = 0; i < read_samples; i++) {
-        int32_t val = bit32_buffer[i] >> 12;
-        dest[i] = (val > INT16_MAX) ? INT16_MAX : (val < -INT16_MAX) ? -INT16_MAX : (int16_t)val;
+    int actual_samples = read_samples / 2;
+    for (int i = 0; i < actual_samples; i++) {
+        int32_t left_val = bit32_buffer[i * 2] >> 12;
+        int32_t right_val = bit32_buffer[(i * 2) + 1] >> 12;
+        int32_t mixed = (left_val + right_val) / 2;
+        dest[i] = (mixed > INT16_MAX) ? INT16_MAX : ((mixed < -INT16_MAX) ? -INT16_MAX : (int16_t)mixed);
     }
-    return read_samples;
+    return actual_samples;
 }
 
 void NoAudioCodec::EnableInput(bool enable) {
