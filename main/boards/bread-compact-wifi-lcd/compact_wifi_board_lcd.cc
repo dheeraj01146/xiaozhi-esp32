@@ -15,7 +15,6 @@
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
 #include "driver/ledc.h"
-#include "driver/i2s.h"
 #include <driver/spi_common.h>
 
 #if defined(LCD_TYPE_ILI9341_SERIAL)
@@ -238,68 +237,14 @@ public:
 
 DECLARE_BOARD(CompactWifiBoardLCD);
 
-#include "driver/ledc.h"
-
-void initServo() {
-    ledc_timer_config_t ledc_timer = {
-        .speed_mode = LEDC_LOW_SPEED_MODE,
-        .duty_resolution = LEDC_TIMER_16_BIT,
-        .timer_num = LEDC_TIMER_0,
-        .freq_hz = 50,
-        .clk_cfg = LEDC_AUTO_CLK
-    };
-    ledc_timer_config(&ledc_timer);
-
-    ledc_channel_config_t ledc_channel = {
-        .gpio_num = 18,
-        .speed_mode = LEDC_LOW_SPEED_MODE,
-        .channel = LEDC_CHANNEL_0,
-        .intr_type = LEDC_INTR_DISABLE,
-        .timer_sel = LEDC_TIMER_0,
-        .duty = 0,
-        .hpoint = 0
-    };
-    ledc_channel_config(&ledc_channel);
-}
-
-void writeServoAngle(int angle) {
-    int duty = 3277 + (angle * (6554 - 3277) / 180);
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
-    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
-}
-
 void robotBehaviorTask(void *pvParameters) {
     int currentAngle = 90;
     initServo();
     writeServoAngle(currentAngle);
-    
-    int32_t buffer[512];
-    size_t bytesRead;
 
     while (1) {
-        if (i2s_read(I2S_NUM_0, &buffer, sizeof(buffer), &bytesRead, pdMS_TO_TICKS(50)) == ESP_OK) {
-            long leftSum = 0;
-            long rightSum = 0;
-            int samples = bytesRead / sizeof(int32_t);
-            
-            for (int i = 0; i < samples; i += 2) {
-                leftSum += abs(buffer[i]);
-                rightSum += abs(buffer[i + 1]);
-            }
-
-            if (abs(leftSum - rightSum) > 500000) {
-                if (leftSum > rightSum) {
-                    currentAngle = 45;
-                } else {
-                    currentAngle = 135;
-                }
-                writeServoAngle(currentAngle);
-                vTaskDelay(pdMS_TO_TICKS(400));
-            } else {
-             int randomIdle = esp_random() % 31 + 75;  // 75 se 105 ke beech ka random angle
-                writeServoAngle(randomIdle);
-            }
-        }
+        int randomIdle = esp_random() % 31 + 75; // 75 se 105 ke beech random angle
+        writeServoAngle(randomIdle);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
