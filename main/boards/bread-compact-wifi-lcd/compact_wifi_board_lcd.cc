@@ -14,7 +14,6 @@
 #include <esp_lcd_panel_vendor.h>
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
-#include "driver/ledc.h"
 #include <driver/spi_common.h>
 
 #if defined(LCD_TYPE_ILI9341_SERIAL)
@@ -191,15 +190,6 @@ public:
         InitializeLcdDisplay();
         InitializeButtons();
         InitializeTools();
-       xTaskCreatePinnedToCore(
-            robotBehaviorTask,
-            "RobotBehavior",
-            4096,
-            NULL,
-            1,
-            NULL,
-            1
-        );
         if (DISPLAY_BACKLIGHT_PIN != GPIO_NUM_NC) {
             GetBacklight()->RestoreBrightness();
         }
@@ -236,15 +226,3 @@ public:
 };
 
 DECLARE_BOARD(CompactWifiBoardLCD);
-
-void robotBehaviorTask(void *pvParameters) {
-    int currentAngle = 90;
-    initServo();
-    writeServoAngle(currentAngle);
-
-    while (1) {
-        int randomIdle = esp_random() % 31 + 75; // 75 se 105 ke beech random angle
-        writeServoAngle(randomIdle);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-}
